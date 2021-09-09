@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class CatalogResponse {
     private int id;
+    private String code;
     private String name;
     private double price;
     private int balance;

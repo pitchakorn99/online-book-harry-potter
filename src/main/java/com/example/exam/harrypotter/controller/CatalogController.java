@@ -25,6 +25,7 @@ public class CatalogController {
         catalogResponses = this.catalogService.getCatalog().stream().map(m -> {
             CatalogResponse r = new CatalogResponse();
             r.setId(m.getId());
+            r.setCode(m.getBookCode());
             r.setName(m.getBookName());
             r.setPrice(m.getPricePerUnit());
             r.setBalance(m.getBalance());
@@ -39,6 +40,7 @@ public class CatalogController {
         Catalog res = this.catalogService.getCatalogById(Integer.parseInt(id));
 
         CatalogResponse catalogResponse = new CatalogResponse();
+        catalogResponse.setCode(res.getBookCode());
         catalogResponse.setId(res.getId());
         catalogResponse.setName(res.getBookName());
         catalogResponse.setPrice(res.getPricePerUnit());

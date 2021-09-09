@@ -23,11 +23,11 @@ public class BuyBookService {
     @Autowired
     public BuyBookService(
             CatalogService catalogService
-    ){
+    ) {
         this.catalogService = catalogService;
     }
 
-    public BuyBookResponse byBook(BuyBookQuery query){
+    public BuyBookResponse byBook(BuyBookQuery query) {
         BuyBookResponse response = new BuyBookResponse();
 
         List<Catalog> bookList = getBookData(query.getBuy());
@@ -40,7 +40,7 @@ public class BuyBookService {
                     .stream()
                     .filter(f -> f.getBookCode().equals(x.getBookCode()))
                     .findFirst();
-            if(amount.isPresent()){
+            if (amount.isPresent()) {
                 de.setAmount(amount.get().getAmount());
             }
             de.setPricePerUnit(x.getPricePerUnit());
@@ -51,7 +51,7 @@ public class BuyBookService {
         double price = bookList.stream().mapToDouble(d -> {
             Optional<BuyBookDetail> buyAmount = query.getBuy().stream().filter(f -> f.getBookCode().equals(d.getBookCode()))
                     .findFirst();
-            if(buyAmount.isPresent()){
+            if (buyAmount.isPresent()) {
 
                 return buyAmount.get().getAmount() * d.getPricePerUnit();
             }
@@ -64,30 +64,55 @@ public class BuyBookService {
         return response;
     }
 
-    private List<Catalog> getBookData(List<BuyBookDetail> byBookDetails){
+    public boolean buyBookSubmit(BuyBookQuery query) {
+        try {
+            List<Catalog> bookList = getBookData(query.getBuy());
+            List<Catalog> updateCatalog = bookList.stream().map(book -> {
+                    Optional<BuyBookDetail> amountOpt = query.getBuy()
+                            .stream()
+                            .filter(b -> b.getBookCode().equals(book.getBookCode()))
+                            .findFirst();
+                    if (amountOpt.isPresent()) {
+                        book.setBalance(book.getBalance() - amountOpt.get().getAmount());
+                    }
+                    return book;
+                }).collect(Collectors.toList());
+            this.catalogService.updateCatalog(updateCatalog);
+            return true;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            return false;
+        }
+    }
+
+    private List<Catalog> getBookData(List<BuyBookDetail> byBookDetails) {
         List<Catalog> bookList = new ArrayList<>();
         for (BuyBookDetail detail : byBookDetails) {
             Catalog b = this.catalogService.getBuyBookCode(detail.getBookCode());
-            if(b != null){
+            if (b != null) {
                 bookList.add(b);
             }
         }
         return bookList;
     }
 
-    private double calculatePercentDiscount(List<Catalog> bookList){
+    private double calculatePercentDiscount(List<Catalog> bookList) {
         List<String> tempBookCode = bookList.stream().map(x -> x.getBookCode()).collect(Collectors.toList());
         Map<String, Long> counted = tempBookCode.stream().collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
 
         double percentDiscount = 0;
-        switch (counted.size()){
-            case 2: percentDiscount = 0.05;
+        switch (counted.size()) {
+            case 2:
+                percentDiscount = 0.05;
                 break;
-            case 3: percentDiscount = 0.10;
+            case 3:
+                percentDiscount = 0.10;
                 break;
-            case 4: percentDiscount = 0.20;
+            case 4:
+                percentDiscount = 0.20;
                 break;
-            case 5: percentDiscount = 0.25;
+            case 5:
+                percentDiscount = 0.25;
                 break;
             default:
                 percentDiscount = 0;

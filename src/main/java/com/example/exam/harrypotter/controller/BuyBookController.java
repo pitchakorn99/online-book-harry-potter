@@ -24,11 +24,7 @@ public class BuyBookController {
     }
 
     @PostMapping(value = "/buy-book/submit", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public BuyBookResponse buyBookSubmit(@RequestBody BuyBookQuery query){
-        BuyBookResponse response = new BuyBookResponse();
-
-        response = this.buyBookService.byBook(query);
-
-        return response;
+    public boolean buyBookSubmit(@RequestBody BuyBookQuery query){
+        return this.buyBookService.buyBookSubmit(query);
     }
 }

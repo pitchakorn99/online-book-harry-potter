@@ -32,4 +32,8 @@ public class CatalogService {
     public Catalog getBuyBookCode(String bookCode){
         return this.catalogRepository.findByBookCode(bookCode);
     }
+
+    public void updateCatalog(List<Catalog> catalogs) throws Exception{
+        this.catalogRepository.saveAll(catalogs);
+    }
 }
